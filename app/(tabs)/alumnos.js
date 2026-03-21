@@ -1,7 +1,9 @@
-import { FlatList, View } from "react-native";
+import { FlatList, View , StyleSheet } from "react-native";
 import { useEffect, useState } from "react";
-import {List, TouchableRipple, TextInput, Text, Menu} from 'react-native-paper';
+import {List, TouchableRipple, TextInput, Text, Menu, Button, Snackbar} from 'react-native-paper';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+
+import Agregar from "../Agregar";
 
 
 export default function Alumnos(){
@@ -15,6 +17,11 @@ export default function Alumnos(){
   const [ordenarAlumnos, setOrdenarAlumnos] = useState([]);
   
   const [expanded, setExpanded] = useState(true);
+
+  const [ visible, setVisible ] = useState(false);
+
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [mensaje, setMensaje] = useState('');
 
   const handlePress = () => setExpanded(!expanded);
 
@@ -337,48 +344,71 @@ if(alumnos.length ===0 ){
   )
 }
 
-return(
-  
-  //Op 1
-  
-  
-  // <TextInput placeholder="hola..."></TextInput> de React native y <TextInput> de Paper no se pueden usar juntos
-  <>
-  
-  
-  <Text variant="labelMedium">Busca por nombre:</Text>
-  <TextInput
-  placeholder="ejemplo: David Garza"
-  mode="outlined" 
-  onChangeText={(text)=>onChangeAlumno(text)}
-  value={buscaAlumno}
-  right={<TextInput.Icon icon="magnify" />}></TextInput>
-  
-   <List.Section title="Ordenar" expanded={expanded} onPress={handlePress}>
-      <List.Accordion
-        title="Ordenar"
-        left={props => <List.Icon {...props} icon="sort" />}>
-        <List.Item title="Nombre: AZ" onPress={ordenarNombreAZ}/>
-        <List.Item title="Apellido: AZ" onPress={ordenarApellidoAZ} />
-      </List.Accordion>
 
-     
-    </List.Section>
+function handleAgregarAlumno(nuevoAlumno) {
+  const existe = alumnos.some(
+    (alumno) => alumno.matricula === nuevoAlumno.matricula
+  );
+  if(existe) {
+    setMensaje('La matrícula ya existe');
+    setSnackbarVisible(true);
+    return;
+  }
+  setAlumnos([...alumnos, nuevoAlumno]);
+  setMensaje('Alumno agregado correctamente');
+  setSnackbarVisible(true);
+}
+
+return(
+  <>
+  <Agregar
+    visible={visible}
+    onAdd={handleAgregarAlumno}
+    onDismiss={()=>setVisible(false)}/>
+
+  <Text variant="labelMedium">Busca por nombre:</Text>
+  <TextInput style={{}}
+    placeholder="ejemplo: David Garza"
+    mode="outlined" 
+    onChangeText={(text)=>onChangeAlumno(text)}
+    value={buscaAlumno}
+    right={<TextInput.Icon icon="magnify"/>}>
+  </TextInput>
+  <Button style={styles.button} onPress={()=>setVisible(true)}>Agregar Alumno</Button>
+
+  <List.Section expanded={expanded} onPress={handlePress}>
+    <List.Accordion
+      title="Ordenar"
+      left={props => <List.Icon {...props} icon="sort" />}>
+      <List.Item title="Nombre: AZ" onPress={ordenarNombreAZ}/>
+      <List.Item title="Apellido: AZ" onPress={ordenarApellidoAZ} />
+    </List.Accordion>
+  </List.Section>
   
   <FlatList
   data={ordenarAlumnos.length ? ordenarAlumnos : alumnosFiltrados}
   keyExtractor={(item) => item.matricula}
   renderItem={({ item }) => (
     <>
-    
     <List.Item title={`${item.nombre} ${item.apellido}`} description={item.matricula} left={props => <MaterialIcons name="account-circle" size={40}></MaterialIcons>}></List.Item>
     </>
   )} />
+
+  <Snackbar
+    visible={snackbarVisible}
+    onDismiss={() => setSnackbarVisible(false)}
+    duration={2000}
+  >
+    {mensaje}
+  </Snackbar>
   </>
-  
-  //Op 2: Map sin FlatList
-  // alumnos.map((alumno) => (
-    //     <List.Item key={alumno.matricula} title={alumno.nombre} left={props => <MaterialIcons name="account-circle" size={40}></MaterialIcons>}></List.Item>
-  // ))
 )
 }
+
+const styles = StyleSheet.create({
+  button: {
+    borderColor: "black",
+    borderWidth: 2,
+    backgroundColor: "#5e77be",
+  },
+});
