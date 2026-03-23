@@ -1,24 +1,28 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Modal, Portal, TextInput, Button } from 'react-native-paper';
 
-const Agregar = ({ visible, onDismiss, onAdd }) => {
+export default function ModalAlumno({ accion, visible, onDismiss, onAdd}) {
+
   const [matricula, setMatricula] = useState('');
   const [nombre, setNombre] = useState('');
+  const [apellido, setApellido] = useState('');
+
+  const limpiarCampos = () => {
+    setMatricula('');
+    setNombre('');
+    setApellido('');
+  };
 
   const handleAdd = () => {
     if (!matricula || !nombre) return;
 
-    onAdd({ matricula, nombre });
+    onAdd({ matricula, nombre, apellido});
 
     limpiarCampos();
     onDismiss();
   };
 
-  const limpiarCampos = () => {
-    setMatricula('');
-    setNombre('');
-  };
 
   const handleCancel = () => {
     limpiarCampos();
@@ -43,9 +47,16 @@ const Agregar = ({ visible, onDismiss, onAdd }) => {
           style={styles.input}
         />
 
+        <TextInput
+          label="Apellido"
+          value={apellido}
+          onChangeText={setApellido}
+          style={styles.input}
+        />
+
         <View style={styles.buttons}>
           <Button mode="contained" onPress={handleAdd}>
-            Agregar
+            {accion}
           </Button>
 
           <Button mode="outlined" onPress={handleCancel}>
@@ -58,11 +69,9 @@ const Agregar = ({ visible, onDismiss, onAdd }) => {
   );
 };
 
-export default Agregar;
-
 const styles = StyleSheet.create({
   modal: {
-    backgroundColor: 'white',
+    backgroundColor: '#1e1e1e',
     padding: 20,
     margin: 20,
     borderRadius: 10,
